@@ -16,6 +16,10 @@ jobs:
     steps:
     - name: checkout repository
       uses: actions/checkout@v3
+      
+    - name: Fetch entire Git history (including tags)
+      run: git fetch --prune --unshallow --tags
+      shell: bash
 
     - name: Get version
       id: get-version
