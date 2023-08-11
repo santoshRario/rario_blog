@@ -16,11 +16,13 @@ jobs:
     steps:
     - name: checkout repository
       uses: actions/checkout@v3
+
     - name: Get version
       id: get-version
       uses: beaconbrigade/package-json-version@v0.3
       with:
         path: ./
+        
     - name: Collect issue numbers since last release/tag
       run: |
         export LC_ALL=en_US.utf8
