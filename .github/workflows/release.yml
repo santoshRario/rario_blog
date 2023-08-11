@@ -16,11 +16,11 @@ jobs:
     steps:
     - name: checkout repository
       uses: actions/checkout@v3
-    - name: Get varsion
+    - name: Get version
       id: get-version
       uses: beaconbrigade/package-json-version@v0.3
       with:
-        path: ./packages/multiverse
+        path: ./
     - uses: actions/checkout@v2
     - uses: GeoWerkstatt/create-jira-release@v1
       with:
