@@ -27,7 +27,7 @@ jobs:
       run: |
         export LC_ALL=en_US.utf8
         git log $(git describe --tags --abbrev=0)..HEAD --oneline | \
-          grep -oE "${{ inputs.jira-project-key }}-[[:digit:]]{1,}" | sort | uniq | \
+          grep -oE "RAR-[[:digit:]]{1,}" | sort | uniq | \
           sed 's/^\|$/"/g' | paste -sd , | awk '{print "RELATED_JIRA_ISSUES="$0}' >> $GITHUB_ENV
       shell: bash
 
