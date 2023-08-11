@@ -3,7 +3,7 @@ name: Create New Release
 on:
   push:
     branches:
-      - test-branch
+      - main
   workflow_dispatch:
 
 defaults:
@@ -16,14 +16,28 @@ jobs:
     steps:
     - name: checkout repository
       uses: actions/checkout@v3
+      
+    - name: Fetch entire Git history (including tags)
+      run: git fetch --prune --unshallow --tags
+      shell: bash
+
     - name: Get version
       id: get-version
       uses: beaconbrigade/package-json-version@v0.3
       with:
         path: ./
-    - uses: actions/checkout@v2
-    - uses: GeoWerkstatt/create-jira-release@v1
-      with:
-        jira-project-key: 'RAR'
-        jira-automation-webhook: ${{ secrets.JIRA_AUTOMATION_WEBHOOK }}
-        build-version: ${{ steps.get-version.outputs.version }}
+        
+    - name: Collect issue numbers since last release/tag
+      run: |
+        export LC_ALL=en_US.utf8
+        git log $(git describe --tags --abbrev=0)..HEAD --oneline | \
+          grep -oE "RAR-[[:digit:]]{1,}" | sort | uniq | \
+          sed 's/^\|$/"/g' | paste -sd , | awk '{print "RELATED_JIRA_ISSUES="$0}' >> $GITHUB_ENV
+      shell: bash
+
+    - name: Create json and invoke webhook
+      run: |
+        $json = ConvertTo-Json @{issues = @(${{ env.RELATED_JIRA_ISSUES }}); data = @{version = "${{ steps.get-version.outputs.version }}"; projectName = "RAR"}}
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-RestMethod ${{ secrets.JIRA_AUTOMATION_WEBHOOK }} -Method Post -Body $json -ContentType "application/json"
+      shell: pwsh
