@@ -1,0 +1,29 @@
+name: Create New Release
+
+on:
+  push:
+    branches:
+      - test-branch
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repository
+      uses: actions/checkout@v3
+    - name: Get varsion
+      id: get-version
+      uses: beaconbrigade/package-json-version@v0.3
+      with:
+        path: ./packages/multiverse
+    - uses: actions/checkout@v2
+    - uses: GeoWerkstatt/create-jira-release@v1
+      with:
+        jira-project-key: 'RAR'
+        jira-automation-webhook: ${{ secrets.JIRA_AUTOMATION_WEBHOOK }}
+        build-version: ${{ steps.get-version.outputs.version }}
